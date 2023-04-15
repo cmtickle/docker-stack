@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# ALLOW THIS TO RUN FROM ANYWHERE UNDER 'docker-stack'
+# IT COULD TECHNICALLY RUN ANYWHERE BUT COULD CAUSE CONFUSION
+if [[ "$PWD" != *"docker-stack"* ]]; then
+  echo "This script can only run with the docker-stack folder tree."
+  exit 1;
+fi
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+
+# Project Variables
+required_containers=( "nginx" "kibana");
+vmhost_name="kibana.local";
+
+###############################################
+# BESPOKE FUNCTIONS AS THIS SCRIPT IS A BIT ODD
+###############################################
+START_PHASE=1;
+
+######################################
+# Start the required docker containers
+######################################
+docker:start () {
+  ./bin/docker-compose up -d ${required_containers[*]}
+  host_entry_display
+}
+
+############################
+# Stop all Docker containers
+############################
+docker:stop () {
+  ./bin/docker-compose stop kibana
+}
+
+############################################
+# Show the status of all required containers
+############################################
+docker:status () {
+  ./bin/docker-compose ps ${required_containers[*]}
+}
+
+host_entry_display () {
+    echo -e "
+####################################
+# Please add host entry
+#
+# MAC/LINUX:
+# 127.0.0.1 ${vmhost_name}
+#
+# WINDOWS:
+# 192.168.99.100 ${vmhost_name}
+####################################\n";
+}
+
+####################################################
+# check we have a parameter, if not, echo the usage.
+####################################################
+internal_setup_init () {
+  functions=($(compgen -A function | grep -v -e "^internal_\|^echo_info$\|^echo_warn$\|^echo_error$" | sort | tr "\r\n" " "));
+  if [ $# -ne 1 ]; then
+      echo -e "USAGE: ${BASH_SOURCE[1]} <argument>\n\nSupported arguments ::";
+       for func in "${functions[@]}"; do
+         echo "$func";
+       done;
+       exit 1;
+  fi
+}
+
+internal_setup_init "$@";
+$1;

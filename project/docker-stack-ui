@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+###########################################
+# IMPORT SHARED CODE.
+# YOU SHOULD NOT NEED TO EDIT THIS SECTION.
+###########################################
+# ALLOW THIS TO RUN FROM ANYWHERE UNDER 'docker-stack'
+# IT COULD TECHNICALLY RUN ANYWHERE BUT COULD CAUSE CONFUSION
+if [[ "$PWD" != *"docker-stack"* ]]; then
+  echo "This script can only run with the docker-stack folder tree."
+  exit 1;
+fi
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+
+source ./project/includes/_config.sh                  # Import global variables
+source ./project/includes/_functions_shared.sh               # Import the common code used by all of our setup scripts..
+
+# Project Variables
+php_host='php82'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
+required_containers=( "nginx" "${php_host}");
+composer_version="2";
+vmhost_name='docker-stack.localhost'; # domain name for this project in local vm.
+START_PHASE=4;
+
+##############################
+# BESPOKE/OVERLOADED FUNCTIONS
+##############################
+internal_setup_init () {
+  functions=($(compgen -A function | grep -v -e "^internal_\|^echo_info$\|^echo_warn$\|^echo_error$" | sort | tr "\r\n" " "));
+
+  if [[ ${#BASH_ARGV[@]} -lt 1 || "${BASH_ARGV[0]}" != *"docker"* ]]; then
+    echo "USAGE: ${0} docker:start|docker:stop|docker:status";
+    exit 1;
+  fi
+
+  # Bash arguments act as a "stack", so parameters are reversed.
+  # This is not useful if we want to use those parameters as arguments for functions.
+  # So we create a reversed version of the parameters as ...
+  # ...
+  # BASH_ARGVS
+  for (( i=${#BASH_ARGV[@]}-1;i>=0;i-- ));do
+     pos=$(echo ${#BASH_ARGV[@]}-1-$i | bc)
+     BASH_ARGVS[$pos]=${BASH_ARGV[$i]};
+  done
+
+  # If a valid function name was provided, run the function and exit.
+  if [[ "${functions[*]}" =~ ${BASH_ARGVS[0]} ]]; then
+    echo_info "Running function \"${BASH_ARGVS[*]}\" ...";
+    ${BASH_ARGVS[*]} ;
+    exit $?;
+  fi
+}
+
+##################
+# Run the function
+##################
+internal_setup_init;

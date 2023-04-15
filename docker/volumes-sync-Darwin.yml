@@ -1,0 +1,37 @@
+version: '3'
+
+x-mutagen:
+  sync:
+    defaults:
+      symlink:
+        mode: "posix-raw"
+      ignore:
+        vcs: false
+        paths:
+          - ".idea"
+          - ".docker"
+          - "generated/code"
+    code:
+      alpha: "${PWD}/src"
+      beta: "volume://web_files"
+      mode: "two-way-resolved"
+      configurationBeta:
+        permissions:
+          defaultOwner: "id:501"
+          defaultGroup: "id:20"
+    ssh-key:
+      alpha: "${HOME}/.ssh"
+      beta: "volume://ssh-key"
+      configurationBeta:
+        permissions:
+          defaultOwner: "id:501"
+          defaultGroup: "id:20"
+#    lhci-data:
+#      alpha: "./project/resources/lighthouse"
+#      beta: "volume://lhci-data"
+#      mode: "two-way-resolved"
+#      configurationBeta:
+#        permissions:
+#          defaultOwner: "id:501"
+#          defaultGroup: "id:20"
+

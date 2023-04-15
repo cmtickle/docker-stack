@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+################################################################
+# THIS IS THE PROJECT I WILL USE FOR MY TALK AT MAGE TITANS 2023
+#
+# IT DEMONSTRATES A FEW EXTRA FEATURES SUCH AS:
+#    PROJECT SPECIFIC CONTAINERS
+#    PROJECT SPECIFIC FUNCTIONS
+#    GITHUB ARGUMENTS
+#    CMTICKLE/ELASTIC-APM INTEGRATION
+################################################################
+
+###########################################
+# IMPORT SHARED CODE.
+# YOU SHOULD NOT NEED TO EDIT THIS SECTION.
+###########################################
+# ALLOW THIS TO RUN FROM ANYWHERE UNDER 'docker-stack'
+# IT COULD TECHNICALLY RUN ANYWHERE BUT COULD CAUSE CONFUSION
+if [[ "$PWD" != *"docker-stack"* ]]; then
+  echo "This script can only run with the docker-stack folder tree."
+  exit 1;
+fi
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+
+source ./project/includes/_config.sh             # Import global variables
+source ./project/includes/_functions_shared.sh   # Import the common functions used by all of our setup scripts..
+source ./project/includes/_functions_m2.sh       # Import the functions used by all M2 setup scripts..
+source "./docker/.env";                          # Enable access to the Docker environment variables
+
+# Project Variables
+repo_type='custom'; # 'github' or 'bitbucket'
+cvs_custom_url='ssh://git@gitea:22/magento/magento2.git';
+cvs_organisation='magento'; # the organisation name for Github or Bitbucket
+project_name='magento2'; # Name as used in Github or Bitbucket
+cvs_branch="2.4.5-p2";
+github_args='--depth 1';
+resources_storage='local'; # Where to access shared resources (see README.md), 'local' or 's3'
+db_host='mysql80'; # 'percona56' or 'percona57'
+php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
+required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch716" "gitea" "kibana" "${php_host}" "${db_host}");
+composer_version="2";
+db_name='mage_titans'; # unique name for this database
+vmhost_name='titans.localhost'; # domain name for this project in local vm.
+docker_compose_args='-f ./project/resources/titans.localhost/docker-compose-services.yml'
+
+###################
+# Bespoke functions
+###################
+
+internal_setup_gitea () {
+  GITEA_DB_EXISTS=$(./bin/docker-exec ${db_host} "mysql -h 127.0.0.1 -u root -proot -e \"show databases;\" 2>/dev/null | grep -c gitea");
+  if [ "${GITEA_DB_EXISTS}" -eq 0 ]; then
+    echo_info "Creating Gitea database";
+    ./bin/docker-exec ${db_host} "mysql -h 127.0.0.1 -uroot -proot -e \"CREATE DATABASE gitea\"";
+    echo_info "Loading database backup into database gitea ...";
+    docker:copy ./project/resources/${vmhost_name}/gitea/gitea.sql.gz ${db_host}:/tmp/gitea.sql.gz
+    UNPACKED_SIZE=$(./bin/docker-exec ${db_host} "gzip -l /tmp/gitea.sql.gz | sed -n 2p | awk '{print \$2}'");
+    if [ "$(./bin/docker-exec ${db_host} "whereis pv | sed 's/^pv:\s*//'")" != "" ]; then
+      ./bin/docker-exec ${db_host} "zcat /tmp/gitea.sql.gz | pv --force --progress --size ${UNPACKED_SIZE} | mysql --binary-mode --force -h 127.0.0.1 -uroot -proot gitea"
+    else
+      ./bin/docker-exec ${db_host} "zcat /tmp/gitea.sql.gz | mysql --force -h 127.0.0.1 -uroot -proot gitea"
+    fi
+    echo_info "Adding gitea config file";
+    docker:copy ./project/resources/${vmhost_name}/gitea/app.ini gitea:/data/gitea/conf/app.ini
+    echo_info "Adding magento bare repository";
+    docker:copy ./project/resources/${vmhost_name}/gitea/magento_git.tar.gz gitea:/tmp/
+    ./bin/docker-compose ${docker_compose_args} exec gitea "mkdir -p /data/git/repositories"
+    ./bin/docker-compose ${docker_compose_args} exec gitea "tar -xvzf /tmp/magento_git.tar.gz --directory /data/git/repositories"
+    echo_error "This script cannot automatically install gitea and create the mirror repository.
+      You will need to access http://127.0.0.1:3000 and complete the setup manually (ignore errors about an existing install).
+      Then add your public ssh key as a deploy key to the Gitea magento2/magento2 repository with write access.
+      Then:
+          git clone --bare git@github.com:magento/magento2.git
+          cd magento2.git
+          git push --mirror ssh://git@127.0.0.1:222/magento/magento2.git
+      Then rerun this script."
+    exit 1;
+  fi
+}
+
+internal_require_apm () {
+  composer config repositories.cmtickle/module-elastic-apm vcs https://github.com/cmtickle/elastic-apm-magento.git;
+  composer require --dev cmtickle/module-elastic-apm:dev-develop@dev;
+  docker:copy ./project/resources/titans.localhost/apm.php ${php_host}:/var/www/htdocs/${vmhost_name}/app/etc/apm.php
+}
+
+internal_show_gitea_info () {
+  if [ ${START_PHASE} -gt 3 ] ; then
+      return;
+  fi
+
+  echo -e "
+  ${YELLOW}
+  ########################################
+  # Gitea version control is available at:
+  #
+  # http://127.0.0.1:3000
+  #
+  # Username : dev-vm
+  # Password : dev-vm123
+  #
+  # Git SSH URL from the host:
+  # ssh://git@127.0.0.1:222/magento/magento2.git
+  #
+  # Git SSH URL from a container:
+  # ssh://git@gitea:22/magento/magento2.git
+  #
+  ########################################${NC}\n";
+}
+
+##################################
+# INITIALISE THE VARIABLES/SCRIPT
+# THIS MUST ALWAYS BE CALLED FIRST
+##################################
+internal_setup_init;
+internal_verify_required_containers_are_up;
+
+############################
+# CALL THE SHARED FUNCTIONS.
+############################
+internal_setup_gitea;
+repository_clone;
+required_dirs_create ;
+db:get;
+db:load;
+composer_config;
+composer_require_dev_tools;
+internal_require_apm;
+composer_install;
+composer_update;
+config:get;
+redis:flush all;
+config:apply;
+# Sample data needs adding like this or the Composer command fails due to a credentials error.
+setup:upgrade;
+sampledata:deploy;
+composer_update;
+# End of sample data addition.
+setup:upgrade;
+bin/magento dev:profiler:enable '{\"drivers\":[{\"type\":\"Cmtickle\\\\ElasticApm\\\\Profiler\\\\Driver\"}]}'
+bin/magento setup:static-content:deploy -f en_US en_GB;
+cache:flush;
+cache:enable;
+indexer:reindex;
+create_admin_user;
+internal_show_gitea_info;
+host_entry_display;

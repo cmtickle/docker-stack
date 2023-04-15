@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+REAL_DOCKER_COMPOSE_CMD=$(which -a docker-compose | grep -v 'docker-stack' | head -1);
+
+# INFO:
+# If you want to disable the default docker-stack behaviour of volume/file synchronisation add the following to your .bashrc or .zprofile file:
+# DOCKER_NOSYNC_VOLUMES=1
+
+# Bash arguments act as a "stack", so parameters are reversed.
+# This is not useful if we want to use those parameters as arguments for functions.
+# So we create a reversed version of the parameters as ...
+# ...
+# BASH_ARGVS
+for (( i=${#BASH_ARGV[@]}-1;i>=0;i-- ));do
+   pos=$(echo ${#BASH_ARGV[@]}-1-$i | bc)
+   BASH_ARGVS[$pos]=${BASH_ARGV[$i]};
+done
+
+# If the user is inside docker-stack run this wrapper.
+# Otherwise run the base command with the arguments supplied.
+if [[ "$PWD" == *"docker-stack"* || "$PWD" == *"htdocs"* ]]; then
+  # Allow this to run from anywhere.
+  SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+  cd "$SCRIPT_PATH"
+  source ./bin/_shared.sh;
+
+  docker_args="${BASH_ARGVS[*]}";
+
+  # LOGIC FOR SYNCING/NOT FILES
+  if [[ -n "$DOCKER_NOSYNC_VOLUMES" && "$DOCKER_NOSYNC_VOLUMES" -eq 1 ]]; then
+    echo -e "INFO: Docker-stack file synchronisation disabled.\n";
+    VOLUME_SYNC_YML="";
+  elif [ -f "./docker/volumes-sync-${PLATFORM}.yml" ]; then
+    VOLUME_SYNC_YML="-f ./docker/volumes-sync-${PLATFORM}.yml"
+    if [[ "${OS}" == "Darwin_x86_64" ]] || [[ "${OS}" == "Darwin_arm64" ]]; then
+      REAL_DOCKER_COMPOSE_CMD=$(which -a mutagen-compose | grep -v 'docker-stack' | head -1);
+    fi
+  else
+    [[ $SHLVL -eq 2 ]] && echo "ERROR: The volume synchronisation yml for '${PLATFORM}' is not defined";
+    exit 1
+  fi
+
+  #LOGIC FOR SUPPORTING MULTIPLE OS AND ARCHITECTURE
+  ARCH_SERVICE_YML=""
+  if [ -f "./docker/services-${OS}.yml" ]; then
+    ARCH_SERVICE_YML="-f ./docker/services-${OS}.yml"
+  fi
+
+  # This is because you can't use --build-arg with 'up --build';
+  if [[ "${BASH_ARGVS[*]}" =~ "--build" ]]; then
+    echo "ERROR: You must use 'up' and 'build' commands with docker-stack";
+    exit 1;
+  fi
+
+  # Pass UID and GID to 'build'
+  if [[ "${BASH_ARGVS[*]}" =~ "build" ]]; then
+    docker_args=$(echo "${docker_args}" | sed "s/build\s*\(.*\)/build --build-arg USERID=$(id -u) --build-arg GROUPID=$(id -g) \1/");
+  fi
+
+  USERID=$(id -u) GROUPID=$(id -g) ${REAL_DOCKER_COMPOSE_CMD} -f ./docker/services.yml -f ./docker/volumes.yml ${ARCH_SERVICE_YML} ${VOLUME_SYNC_YML} ${docker_args}
+  exit "$?";
+else
+    ${REAL_DOCKER_COMPOSE_CMD} ${BASH_ARGVS[*]};
+fi
+

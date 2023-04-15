@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+###########################################
+# IMPORT SHARED CODE.
+# YOU SHOULD NOT NEED TO EDIT THIS SECTION.
+###########################################
+# ALLOW THIS TO RUN FROM ANYWHERE UNDER 'docker-stack'
+# IT COULD TECHNICALLY RUN ANYWHERE BUT COULD CAUSE CONFUSION
+if [[ "$PWD" != *"docker-stack"* ]]; then
+  echo "This script can only run with the docker-stack folder tree."
+  exit 1;
+fi
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+
+source ./project/includes/_config.sh             # Import global variables
+source ./project/includes/_functions_shared.sh   # Import the common functions used by all of our setup scripts..
+source ./project/includes/_functions_m2.sh       # Import the functions used by all M2 setup scripts..
+source "./docker/.env";                          # Enable access to the Docker environment variables
+
+# Project Variables
+repo_type='github'; # 'github' or 'bitbucket'
+cvs_organisation='magento'; # the organisation name for Github or Bitbucket
+project_name='magento2'; # Name as used in Github or Bitbucket
+cvs_branch="2.4.5-p2";
+github_args='--depth 1';
+resources_storage='local'; # Where to access shared resources (see README.md), 'local' or 's3'
+db_host='mysql80'; # 'percona56' or 'percona57'
+php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
+required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch7" "${php_host}" "${db_host}");
+composer_version="2";
+db_name='example_m2_opensource'; # unique name for this database
+vmhost_name='eg-m2-opensource.local'; # domain name for this project in local vm.
+
+##################################
+# INITIALISE THE VARIABLES/SCRIPT
+# THIS MUST ALWAYS BE CALLED FIRST
+##################################
+internal_setup_init;
+internal_verify_required_containers_are_up;
+
+############################
+# CALL THE SHARED FUNCTIONS.
+############################
+repository_clone;
+required_dirs_create ;
+db:get;
+db:load;
+composer_config;
+composer_install
+composer_require_dev_tools;
+composer_update;
+config:get;
+redis:flush all;
+config:apply;
+# Sample data needs adding like this or the Composer command fails due to a credentials error.
+setup:upgrade;
+sampledata:deploy;
+setup:upgrade;
+# End of sample data addition.
+bin/magento setup:static-content:deploy -f en_US en_GB;
+cache:flush;
+cache:enable;
+indexer:reindex;
+create_admin_user;
+host_entry_display;

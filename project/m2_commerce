@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+###########################################
+# IMPORT SHARED CODE.
+# YOU SHOULD NOT NEED TO EDIT THIS SECTION.
+###########################################
+# ALLOW THIS TO RUN FROM ANYWHERE UNDER 'docker-stack'
+# IT COULD TECHNICALLY RUN ANYWHERE BUT COULD CAUSE CONFUSION
+if [[ "$PWD" != *"docker-stack"* ]]; then
+  echo "This script can only run with the docker-stack folder tree."
+  exit 1;
+fi
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+pwd
+
+source ./project/includes/_config.sh             # Import global variables
+source ./project/includes/_functions_shared.sh   # Import the common functions used by all of our setup scripts..
+source ./project/includes/_functions_m2.sh       # Import the functions used by all M2 setup scripts..
+source "./docker/.env";                 # Enable access to the Docker environment variables
+
+# Project Variables
+repo_type='github'; # 'github' or 'bitbucket'
+cvs_organisation='magento'; # the organisation name for Github or Bitbucket
+project_name='magento2-commerce'; # Name as used in Github or Bitbucket
+cvs_branch="2.4.5-p2";
+resources_storage='local'; # Where to access shared resources (see README.md), 'local' or 's3'
+db_host='mysql80'; # 'percona56' or 'percona57'
+php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
+required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch7" "${php_host}" "${db_host}");
+composer_version="2";
+db_name='example_m2_commerce'; # unique name for this database
+vmhost_name='eg-m2-commerce.local'; # domain name for this project in local vm.
+
+####################################
+# FUNCTIONS SPECIFIC TO THIS INSTALL
+####################################
+repository_clone () {
+    # Phase ths step should run at.
+    if [ ${START_PHASE} -gt 1 ] ; then
+        echo_warn "[!!] Skipping ${project_name} build ...";
+        return;
+    fi
+
+    PROJECT_CLONED=$(./bin/docker-exec ${php_host} "ls -1 /var/www/htdocs/ | grep -e '^${vmhost_name}$' | wc -l");
+    if [ "$PROJECT_CLONED" == "1" ]; then
+        echo_info "Removing previous ${repo_type} clone";
+        ./bin/docker-exec root ${php_host} "rm -rf /var/www/htdocs/${vmhost_name}";
+    fi
+
+    ./bin/docker-exec ${php_host} "mkdir -pv /var/www/htdocs/.composer"
+    ./bin/docker-exec ${php_host} "mkdir -pv /var/www/htdocs/.config/composer"
+    docker:copy ./project/resources/${vmhost_name}/auth.json ${php_host}:/var/www/htdocs/.composer/auth.json
+    docker:copy ./project/resources/${vmhost_name}/auth.json ${php_host}:/var/www/htdocs/.config/composer/auth.json
+
+    ./bin/docker-exec ${php_host} "cd /var/www/htdocs/; ${COMPOSER_COMMAND} create-project --stability dev --repository-url=https://repo.magento.com/ magento/project-enterprise-edition:${cvs_branch} ${vmhost_name}";
+    docker:copy ./project/resources/${vmhost_name}/auth.json ${php_host}:/var/www/htdocs/${vmhost_name}/ ;
+}
+
+# Needed as a replacement for db:load
+recreate_database () {
+    # Phase ths step should run at.
+    if [ ${START_PHASE} -gt 1 ] ; then
+        echo_warn "[!!] Skipping ${project_name} database recreation ...";
+        return;
+    fi
+
+    echo_info "Dropping and recreating database ${db_name} ...";
+    ./bin/docker-exec ${db_host} "mysql -h 127.0.0.1 -u${db_user} -p${db_password} -e \"DROP DATABASE IF EXISTS ${db_name}\"";
+    ./bin/docker-exec ${db_host} "mysql -h 127.0.0.1 -u${db_user} -p${db_password} -e \"CREATE DATABASE ${db_name}\"";
+}
+
+
+##################################
+# INITIALISE THE VARIABLES/SCRIPT
+# THIS MUST ALWAYS BE CALLED FIRST
+##################################
+internal_verify_auth_json;
+internal_setup_init;
+internal_verify_required_containers_are_up;
+
+############################
+# CALL THE SHARED FUNCTIONS.
+############################
+
+recreate_database;
+repository_clone;
+required_dirs_create ;
+
+## For Commerce, doing this rather than storing a DB and config as it was causing issues.
+bin/magento setup:install --base-url=https://${vmhost_name}/ \
+            --db-host=${db_host} --db-name=${db_name} --db-user=root --db-password=root \
+            --admin-firstname=Magento --admin-lastname=User --admin-email=user@example.com \
+            --admin-user=admin --admin-password=admin1236 --language=en_GB \
+            --currency=GBP --timezone=Europe/London --use-rewrites=1 \
+            --search-engine=elasticsearch7 --elasticsearch-host=elasticsearch7 \
+            --elasticsearch-port=9200
+bin/magento config:set dev/static/sign 0
+bin/magento module:disable Magento_TwoFactorAuth
+bin/magento setup:config:set --no-interaction --cache-backend=redis --cache-backend-redis-server=rediscache --cache-backend-redis-db=3
+bin/magento setup:config:set --no-interaction --session-save=redis --session-save-redis-host=redissession --session-save-redis-log-level=4 --session-save-redis-db=3
+bin/magento setup:config:set --no-interaction --page-cache=redis --page-cache-redis-server=redisfullpage --page-cache-redis-db=3
+
+composer_config;
+composer_install
+composer_update;
+
+./bin/redis-flush cache;
+./bin/redis-flush fullpage;
+
+# Sample data needs adding like this or the Composer command fails due to a credentials error.
+setup:upgrade;
+sampledata:deploy;
+setup:upgrade;
+# End of sample data addition.
+
+bin/magento setup:static-content:deploy -f en_US en_GB;
+cache:flush;
+cache:enable;
+indexer:reindex;
+create_admin_user;
+host_entry_display;

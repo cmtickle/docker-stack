@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+source ./bin/_shared.sh;
+
+if [ $# -ne 1 ]; then
+    echo -e "USAGE :\nredis-flush <cache_type>\n"
+    echo "cache:type MUST be cache, fullpage, session or all";
+    exit 1;
+fi
+CACHE_TYPE=$(echo $1 | xargs);
+if [ "$CACHE_TYPE" == "cache" ] || [ "$CACHE_TYPE" == "fullpage" ] || [ "$CACHE_TYPE" == "session" ]; then
+    echo "Flushing ${CACHE_TYPE} ...";
+    ./bin/docker-exec redis${CACHE_TYPE} "redis-cli flushall"
+elif [ "$CACHE_TYPE" == "all" ]; then
+  echo "Flushing ${CACHE_TYPE} cache types...";
+  ./bin/redis-flush cache;
+  ./bin/redis-flush fullpage;
+  ./bin/redis-flush session;
+else
+  echo "ERROR: Unsupported redis cache type : \"$CACHE_TYPE\"";
+  exit 1;
+fi

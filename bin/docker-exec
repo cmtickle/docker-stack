@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+source ./bin/_shared.sh;
+source ./project/includes/_functions_shared.sh;
+
+ensure_container_is_running () {
+  if [ $(internal_verify_container_is_up ${1}) == "Down" ]; then
+    echo_error "Container \"${1}\" is not running.";
+    exit 1;
+  fi
+}
+
+if [ $# -eq 0 ]; then
+    echo -e "USAGE :\ndocker-exec <optional_user> <container> <optional_command>\n"
+    echo "AVAILABLE CONTAINERS:"
+    ./bin/docker-compose ps --services | sort
+    exit 1;
+elif [ $# -eq 3 ]; then
+  USER=$1;
+  CONTAINER=$2;
+  COMMAND="$3";
+  ensure_container_is_running $CONTAINER
+  echo "$COMMAND" | docker exec -i -u $USER $(internal_docker_container_name $CONTAINER) sh -
+  exit "$?";
+elif [ $# -eq 2 ]; then
+   CONTAINER=$1;
+   COMMAND="$2";
+   ensure_container_is_running $CONTAINER
+   internal_set_USER_by_CONTAINER;
+   echo "$COMMAND" | docker exec -i -u $USER $(internal_docker_container_name $CONTAINER) sh -
+   exit "$?"
+elif [ $# -eq 1 ]; then
+  CONTAINER=$1;
+  ensure_container_is_running $CONTAINER
+  internal_set_USER_by_CONTAINER;
+  docker exec -it -u $USER $(internal_docker_container_name $CONTAINER) bash
+  exit "$?";
+fi

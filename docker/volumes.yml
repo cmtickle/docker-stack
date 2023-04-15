@@ -1,0 +1,43 @@
+version: '3'
+
+volumes:
+  lhci-data:
+  composer_cache:
+  web_files:
+#  mysql_data56:
+  mysql_data57:
+  mysql_data80:
+#  elasticsearch5-data:
+#  elasticsearch6-data:
+  elasticsearch7-data:
+  elasticsearch716-data:
+  lhci-data:
+  shared-tmp:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  ssh-key:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/.ssh
+      o: bind
+  docker-files:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/docker
+      o: bind
+  project-files:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/project
+      o: bind
+  bin-files:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/bin
+      o: bind
+

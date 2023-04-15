@@ -1,0 +1,25 @@
+global:
+  -
+    path: web/unsecure/base_url
+    value: https://titans.localhost/
+  -
+    path: web/secure/base_url
+    value: https://titans.localhost/
+  -
+    path: dev/static/sign
+    value: 0
+  -
+    path: catalog/search/engine
+    value: elasticsearch7
+  -
+    path: catalog/search/elasticsearch7_server_hostname
+    value: elasticsearch716
+  -
+    path: catalog/search/elasticsearch7_server_port
+    value: 9200
+  -
+    path: catalog/search/elasticsearch7_enable_auth
+    value: 0
+  -
+    path: catalog/search/elasticsearch7_server_timeout
+    value: 15

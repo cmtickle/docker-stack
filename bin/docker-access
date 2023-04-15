@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
+cd "$SCRIPT_PATH"
+source ./bin/_shared.sh;
+
+if [ $# == 1 ]; then
+  CONTAINER=$1;
+  internal_set_USER_by_CONTAINER;
+elif [ $# == 2 ]; then
+  USER=$1
+  CONTAINER=$2
+else
+  echo -e "USAGE :\ndocker-access <optional_user> <container>\n"
+  echo "AVAILABLE CONTAINERS:"
+  ./bin/docker-compose ps --services | sort
+  exit 1;
+fi
+
+./bin/docker-compose exec -u $USER $CONTAINER bash

@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+if [ $# -ne 1 ]; then
+    echo ${#};
+    echo -e "USAGE :\nlighthouse-collect  <site-identifier>\n"
+    exit 1;
+else
+  SITE_IDENTIFIER=$1;
+  if [ ! -d "./project/resources/lighthouse-server/${SITE_IDENTIFIER}/" ]; then
+    echo "Site '${SITE_IDENTIFIER}' is not configured, create two projects as below (one for desktop, one for mobile):"
+    echo "./bin/docker-compose exec lighthouse-server lhci wizard";
+    echo "The LHCI server URL when prompted is http://127.0.0.1:9001/";
+    echo "The code repo questions can be ignored.";
+    echo "";
+    echo "Make a note of the tokens which are generated.";
+    echo "In directory ./project/resources/lighthouse-server:"
+    echo "    * Make a copy of the 'base' folder"
+    echo "    * Rename it per your project name."
+    echo "    * Enter the build token in the relevant location in each json file in your new folder";
+    exit 1;
+  fi
+  FAKEHASH=$(node -p "new Date().getTime().toString(16).split('').reverse().join('')")
+  THISTIME=$(date --iso-8601=seconds)
+  THISDATE=$(date)
+fi
+
+#########
+# DESKTOP
+#########
+docker container run --cap-add=SYS_ADMIN \
+  -v "$(pwd)/project/resources/lighthouse-server:/home/lhci/reports/.lighthouseci" \
+  --network "host" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_HASH=${FAKEHASH}" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_TIME=${THISTIME}" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=master" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE='Desktop : ${THISDATE}'" \
+  -e "LHCI_BUILD_CONTEXT__AUTHOR='No one <noreply@example.com>'" \
+  -e "LHCI_BUILD_CONTEXT__AVATAR_URL='https://picsum.photos/id/237/200/200'" \
+  --user $(id -u):$(id -g) \
+  patrickhulce/lhci-client \
+  lhci collect --config=./.lighthouseci/${SITE_IDENTIFIER}/desktop-config.js
+
+# UPLOAD
+docker container run --cap-add=SYS_ADMIN \
+  -v "$(pwd)/project/resources/lighthouse-server:/home/lhci/reports/.lighthouseci" \
+  --network "host" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_HASH=${FAKEHASH}" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_TIME=${THISTIME}" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=master" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE='Desktop : ${THISDATE}'" \
+  -e "LHCI_BUILD_CONTEXT__AUTHOR='No one <noreply@example.com>'" \
+  -e "LHCI_BUILD_CONTEXT__AVATAR_URL='https://picsum.photos/id/237/200/200'" \
+  --user $(id -u):$(id -g) \
+  patrickhulce/lhci-client \
+  lhci upload --config=./.lighthouseci/${SITE_IDENTIFIER}/desktop-config.js
+
+########
+# MOBILE
+########
+docker container run --cap-add=SYS_ADMIN \
+  -v "$(pwd)/project/resources/lighthouse-server:/home/lhci/reports/.lighthouseci" \
+  --network "host" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_HASH=${FAKEHASH}" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_TIME=${THISTIME}" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=master" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE='Mobile and desktop : ${THISDATE}'" \
+  -e "LHCI_BUILD_CONTEXT__AUTHOR='No one <noreply@example.com>'" \
+  -e "LHCI_BUILD_CONTEXT__AVATAR_URL='https://picsum.photos/id/237/200/200'" \
+  --user $(id -u):$(id -g) \
+  patrickhulce/lhci-client \
+  lhci collect --config=./.lighthouseci/${SITE_IDENTIFIER}/mobile-config.js
+
+# UPLOAD
+docker container run --cap-add=SYS_ADMIN \
+  -v "$(pwd)/project/resources/lighthouse-server:/home/lhci/reports/.lighthouseci" \
+  --network "host" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_HASH=${FAKEHASH}" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_TIME=${THISTIME}" \
+  -e "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=master" \
+  -e "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE='Mobile : ${THISDATE}'" \
+  -e "LHCI_BUILD_CONTEXT__AUTHOR='No one <noreply@example.com>'" \
+  -e "LHCI_BUILD_CONTEXT__AVATAR_URL='https://picsum.photos/id/237/200/200'" \
+  --user $(id -u):$(id -g) \
+  patrickhulce/lhci-client \
+  lhci upload --config=./.lighthouseci/${SITE_IDENTIFIER}/mobile-config.js
+
+
+# CLEANUP
+rm -f ./project/resources/lighthouse-server/flags-*
+rm -f ./project/resources/lighthouse-server/*.json
+rm -f ./project/resources/lighthouse-server/*.html

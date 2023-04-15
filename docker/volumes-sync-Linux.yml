@@ -1,0 +1,29 @@
+version: '3'
+
+volumes:
+  web_files:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/src/
+      o: bind
+#  elasticsearch5-data:
+#    driver: local
+#  elasticsearch6-data:
+#    driver: local
+  elasticsearch7-data:
+    driver: local
+  elasticsearch716-data:
+    driver: local
+  ssh-key:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/.ssh
+      o: bind
+  lhci-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/project/resources/lighthouse-server/
+      o: bind

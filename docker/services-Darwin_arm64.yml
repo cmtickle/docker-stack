@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+#  mysql56:
+#    platform: linux/x86_64
+  mysql57:
+    platform: linux/x86_64
+  mysql80:
+    platform: linux/arm64
+#  These are commented in docker-compose-services
+#  php70:
+#    platform: linux/arm64
+#  php71:
+#    platform: linux/arm64
+#  php72:
+#    platform: linux/arm64
+#  php73:
+#    platform: linux/arm64
+  php74:
+    platform: linux/arm64
+  php81:
+    platform: linux/arm64
+  mailhog:
+    platform: linux/x86_64
+#  elasticsearch6:
+#    platform: linux/arm64
+#    environment:
+#      - "ES_JAVA_OPTS=-XX:UseAVX=0 -Xms512m -Xmx512m"
+  elasticsearch7:
+    platform: linux/arm64
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  elasticsearch716:
+    platform: linux/arm64
+  phpstorm-server:
+    platform: linux/x86_64
