@@ -40,8 +40,8 @@ return [
     'session' => [
         'save' => 'redis',
         'redis' => [
-            'host' => 'redissession',
-            'port' => '6379',
+            'host' => '/tmp/redissession.sock',
+            'port' => '0',
             'password' => '',
             'timeout' => '2.5',
             'persistent_identifier' => '',
@@ -70,9 +70,9 @@ return [
                 'id_prefix' => 'm2os_',
                 'backend' => 'Magento\\Framework\\Cache\\Backend\\Redis',
                 'backend_options' => [
-                    'server' => 'rediscache',
+                    'server' => '/tmp/rediscache.sock',
                     'database' => '1',
-                    'port' => '6379',
+                    'port' => '0',
                     'password' => '',
                     'compress_data' => '1',
                     'compression_lib' => ''
@@ -82,9 +82,9 @@ return [
                 'id_prefix' => 'm2os_',
                 'backend' => 'Magento\\Framework\\Cache\\Backend\\Redis',
                 'backend_options' => [
-                    'server' => 'redisfullpage',
+                    'server' => '/tmp/redisfullpage.sock',
                     'database' => '1',
-                    'port' => '6379',
+                    'port' => '0',
                     'password' => '',
                     'compress_data' => '0',
                     'compression_lib' => ''

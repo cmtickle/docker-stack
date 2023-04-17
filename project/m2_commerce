@@ -97,9 +97,9 @@ bin/magento setup:install --base-url=https://${vmhost_name}/ \
             --elasticsearch-port=9200
 bin/magento config:set dev/static/sign 0
 bin/magento module:disable Magento_TwoFactorAuth
-bin/magento setup:config:set --no-interaction --cache-backend=redis --cache-backend-redis-server=rediscache --cache-backend-redis-db=3
-bin/magento setup:config:set --no-interaction --session-save=redis --session-save-redis-host=redissession --session-save-redis-log-level=4 --session-save-redis-db=3
-bin/magento setup:config:set --no-interaction --page-cache=redis --page-cache-redis-server=redisfullpage --page-cache-redis-db=3
+bin/magento setup:config:set --no-interaction --cache-backend=redis --cache-backend-redis-server=/tmp/rediscache.sock --cache-backend-redis-db=3
+bin/magento setup:config:set --no-interaction --session-save=redis --session-save-redis-host=/tmp/redissession.sock --session-save-redis-log-level=4 --session-save-redis-db=3
+bin/magento setup:config:set --no-interaction --page-cache=redis --page-cache-redis-server=/tmp/redisfullpage.sock --page-cache-redis-db=3
 
 composer_config;
 composer_install
