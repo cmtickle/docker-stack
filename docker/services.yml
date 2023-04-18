@@ -238,6 +238,7 @@ services:
         - "8443:8443"
       environment:
           - RUNNING_PROJECT=${RUNNING_PROJECT}
+          - VSCODE_SECURE=${VSCODE_SECURE}
       volumes:
         - ssh-key:/var/www/htdocs/.ssh
         - web_files:/var/www/htdocs

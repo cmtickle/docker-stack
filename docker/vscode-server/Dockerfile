@@ -4,7 +4,7 @@ ARG USERID=1000
 ARG GROUPID=1000
 RUN groupmod -g 999 dialout
 
-ENV CODE_SERVER_VERSION 4.10.0
+ENV CODE_SERVER_VERSION 4.11.0
 
 # fix www-data user to avoid permissions issues
 RUN mkdir -p /var/www/htdocs
@@ -13,10 +13,13 @@ RUN groupmod -g $GROUPID www-data
 RUN chown -R www-data: /var/www/htdocs
 
 RUN apt-get update \
-  && apt-get install -y \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     ca-certificates sudo curl dumb-init \
     git vim \
-    lsb-release wget openssl
+    lsb-release \
+    wget \
+    openssl \
+    php-codesniffer
 
 RUN ARCH="$(dpkg --print-architecture)" && wget https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb \
   && dpkg -i code-server_${CODE_SERVER_VERSION}_amd64.deb && rm -f code-server_${CODE_SERVER_VERSION}_${ARCH}.deb \
@@ -34,6 +37,10 @@ RUN chmod +x /usr/bin/entrypoint.sh && \
 RUN mkdir -p /var/www/htdocs/certs
 ADD certs/. /var/www/certs
 RUN chown -R www-data: /var/www/certs
+
+
+ADD settings.json /var/www/htdocs/.local/share/code-server/User/settings.json
+RUN chown -R www-data: /var/www/htdocs/.local/share/code-server/User/settings.json
 
 USER www-data
 ENV USER=www-data
