@@ -80,7 +80,7 @@ class AdminInterface
         $projectBaseDir = '..' . DIRECTORY_SEPARATOR .  '..';
         $projects = scandir($projectBaseDir);
         foreach ($projects as $project) {
-            if ('docker-stack-ui.localhost' == $project ||
+            if ('docker-stack-ui.loc' == $project ||
                 !preg_match('/^.+\.(local|loc|localhost|test)$/', $project)) {
                 continue;
             }
