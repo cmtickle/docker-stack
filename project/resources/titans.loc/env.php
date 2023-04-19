@@ -123,7 +123,7 @@ return [
         'translate' => 1
     ],
     'downloadable_domains' => [
-        'titans.localhost'
+        'titans.loc'
     ],
     'install' => [
         'date' => 'Wed, 06 Apr 2022 18:15:39 +0000'
