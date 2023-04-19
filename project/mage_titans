@@ -40,8 +40,8 @@ php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
 required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch716" "gitea" "kibana" "${php_host}" "${db_host}");
 composer_version="2";
 db_name='mage_titans'; # unique name for this database
-vmhost_name='titans.localhost'; # domain name for this project in local vm.
-docker_compose_args='-f ./project/resources/titans.localhost/docker-compose-services.yml'
+vmhost_name='titans.loc'; # domain name for this project in local vm.
+docker_compose_args="-f ./project/resources/${vmhost_name}/docker-compose-services.yml"
 
 ###################
 # Bespoke functions
@@ -81,7 +81,7 @@ internal_setup_gitea () {
 internal_require_apm () {
   composer config repositories.cmtickle/module-elastic-apm vcs https://github.com/cmtickle/elastic-apm-magento.git;
   composer require --dev cmtickle/module-elastic-apm:dev-develop@dev;
-  docker:copy ./project/resources/titans.localhost/apm.php ${php_host}:/var/www/htdocs/${vmhost_name}/app/etc/apm.php
+  docker:copy ./project/resources/${vmhost_name}/apm.php ${php_host}:/var/www/htdocs/${vmhost_name}/app/etc/apm.php
 }
 
 internal_show_gitea_info () {

@@ -9,6 +9,8 @@ RUN usermod -u $USERID --home /var/www/htdocs/ www-data
 RUN groupmod -g $GROUPID www-data
 RUN chown www-data: /var/www/
 
+RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y git curl unzip procps time mc strace git
 WORKDIR /tmp
 ARG IDEA_BUILD=223.8617.59

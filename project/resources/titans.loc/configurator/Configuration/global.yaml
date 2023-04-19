@@ -1,10 +1,10 @@
 global:
   -
     path: web/unsecure/base_url
-    value: https://titans.localhost/
+    value: https://titans.loc/
   -
     path: web/secure/base_url
-    value: https://titans.localhost/
+    value: https://titans.loc/
   -
     path: dev/static/sign
     value: 0

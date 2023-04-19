@@ -12,6 +12,8 @@ RUN usermod -u $USERID --home /var/www/htdocs www-data
 RUN groupmod -g $GROUPID www-data
 RUN chown -R www-data: /var/www/htdocs
 
+RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     ca-certificates sudo curl dumb-init \
@@ -28,7 +30,6 @@ RUN ARCH="$(dpkg --print-architecture)" && wget https://github.com/cdr/code-serv
 
 RUN git config --global core.fileMode false
 RUN touch /var/www/htdocs/.bashrc && chown www-data: /var/www/htdocs/.bashrc && chsh -s /usr/bin/bash www-data
-
 
 ADD entrypoint.sh /usr/bin/entrypoint.sh
 RUN chmod +x /usr/bin/entrypoint.sh && \
