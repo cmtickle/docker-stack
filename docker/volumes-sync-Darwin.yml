@@ -26,12 +26,12 @@ x-mutagen:
         permissions:
           defaultOwner: "id:501"
           defaultGroup: "id:20"
-#    lhci-data:
-#      alpha: "./project/resources/lighthouse"
-#      beta: "volume://lhci-data"
-#      mode: "two-way-resolved"
-#      configurationBeta:
-#        permissions:
-#          defaultOwner: "id:501"
-#          defaultGroup: "id:20"
+    lhci-data:
+      alpha: "./project/resources/lighthouse.loc"
+      beta: "volume://lhci-data"
+      mode: "two-way-resolved"
+      configurationBeta:
+        permissions:
+          defaultOwner: "id:501"
+          defaultGroup: "id:20"
 

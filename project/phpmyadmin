@@ -17,6 +17,7 @@ source ./project/includes/_functions_shared.sh               # Import the common
 
 # Project Variables
 repo_type='github'; # 'github' or 'bitbucket'
+github_args='--depth 1';
 cvs_organisation='phpmyadmin'; # the organisation name for Github or Bitbucket
 project_name='phpmyadmin'; # Name as used in Github or Bitbucket
 cvs_branch="RELEASE_5_2_1";
@@ -24,24 +25,34 @@ resources_storage='local'; # Where to access shared resources (see README.md), '
 php_host='php82'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
 required_containers=( "nginx" "${php_host}");
 composer_version="2";
-vmhost_name='phpmyadmin.local'; # domain name for this project in local vm.
+vmhost_name='phpmyadmin.loc'; # domain name for this project in local vm.
 
 ##################################
 # INITIALISE THE VARIABLES/SCRIPT
 # THIS MUST ALWAYS BE CALLED FIRST
 ##################################
-trap 'status=$?;if [ $status -eq 1 ]; then echo -e "\n\n${YELLOW}IGNORE USAGE FOR THIS SCRIPT. TO START DOCKER_STACK UI RUN:\nbash ${0} docker:start${NC}\n";fi;' EXIT;
+trap 'status=$?;if [ $status -eq 1 ]; then echo -e "\n\n${YELLOW}IGNORE USAGE FOR THIS SCRIPT.\nTO START PHPMYADMIN RUN:\nbash ${0} docker:start &&  ${0} setup:all${NC}\n";fi;' EXIT;
 internal_setup_init;
 
 ##############################
 # BESPOKE/OVERLOADED FUNCTIONS
 ##############################
+custom_setup () {
+  if [ ${START_PHASE} -gt 1 ] ; then
+      echo_warn "[!!] Skipping extra setup operations ...";
+      return;
+  fi
 
+  ./bin/docker-exec ${php_host} "mv /var/www/htdocs/${vmhost_name}/ /var/www/htdocs/${vmhost_name}_pub/";
+  ./bin/docker-exec ${php_host} "mkdir -p /var/www/htdocs/${vmhost_name}/";
+  ./bin/docker-exec ${php_host} "mv /var/www/htdocs/${vmhost_name}_pub/ /var/www/htdocs/${vmhost_name}/pub/";
+  ./bin/docker-exec ${php_host} "cd /var/www/htdocs/${vmhost_name}/pub/ && yarn install --production"
+  docker:copy ./project/resources/${vmhost_name}/config.inc.php ${php_host}:/var/www/htdocs/${vmhost_name}/pub/
+}
 ############################
 # CALL THE SHARED FUNCTIONS.
 ############################
 repository_clone;
 composer_install;
-./bin/docker-exec ${php_host} "cd /var/www/htdocs/${vmhost_name}/pub/ && yarn install --production"
-docker:copy ./project/resources/${vmhost_name}/config.inc.php ${php_host}:/var/www/htdocs/${vmhost_name}/pub/
+custom_setup;
 host_entry_display;

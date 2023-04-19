@@ -10,8 +10,8 @@ SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")/../" ; pwd -P )
 cd "$SCRIPT_PATH"
 
 # Project Variables
-required_containers=( "nginx" "mailhog");
-vmhost_name="mailhog.loc";
+required_containers=( "nginx" "lighthouse-server");
+vmhost_name="lighthouse.loc";
 
 ###############################################
 # BESPOKE FUNCTIONS AS THIS SCRIPT IS A BIT ODD
@@ -30,7 +30,7 @@ docker:start () {
 # Stop all Docker containers
 ############################
 docker:stop () {
-  ./bin/docker-compose stop mailhog
+  ./bin/docker-compose stop lighthouse-server
 }
 
 ############################################
@@ -45,8 +45,8 @@ host_entry_display () {
 ####################################
 # Please add host entry
 #
-# Mailhog is available on url
-# http://${vmhost_name}
+# Lighthouse server is available on
+# http://${vmhost_name}/
 #
 # MAC/LINUX:
 # 127.0.0.1 ${vmhost_name}

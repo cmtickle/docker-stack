@@ -43,9 +43,9 @@ install  : Any final tasks required to get make the codebase operational e.g. co
 
 <start_phase> supported options :: [files, database, install, all]
 
-setup_all       = file, database and install phase functions
-setup_database  = database and install phase functions
-setup_install   = install phase functions ONLY
+setup:all       = file, database and install phase functions
+setup:database  = database and install phase functions
+setup:install   = install phase functions ONLY
 
 <custom_function> supported options ::
 ";
@@ -89,18 +89,18 @@ setup_install   = install phase functions ONLY
     # PHASE 1 = files/all (STEPS : files, database, install);
     # PHASE 2 = database (STEPS : database, install);
     # PHASE 3 = install (STEPS: install ONLY);
-    if [ "$START_PHASE" == "setup_all" ]; then
+    if [ "$START_PHASE" == "setup:all" ]; then
         START_PHASE=1;
-    elif [ "$START_PHASE" == "setup_database" ]; then
+    elif [ "$START_PHASE" == "setup:database" ]; then
         START_PHASE=2;
-    elif [ "$START_PHASE" == "setup_install" ]; then
+    elif [ "$START_PHASE" == "setup:install" ]; then
         START_PHASE=3;
     else
         echo_error "Unsupported start phase : $START_PHASE";
         exit 1;
     fi
 
-    echo_info "Running with start_phase = ${BASH_ARGVS[0]}";
+    echo_info "Running ${BASH_ARGVS[0]}";
 }
 
 ###################################
@@ -120,12 +120,14 @@ internal_verify_bash_version () {
 
 internal_verify_auth_json () {
   AUTH_JSON_FILE="./project/resources/${vmhost_name}/auth.json";
-  AUTH_JSON_IS_DEFAULT=$(grep -c 'XXXX' $AUTH_JSON_FILE);
-  if [ "${AUTH_JSON_IS_DEFAULT}" -ne 0 ]; then
-    echo_error "Please add your credentials in $AUTH_JSON_FILE";
-    exit 1;
-  else
-    echo_info "AUTH JSON IS FINE";
+  if [ -f "$AUTH_JSON_FILE" ]; then
+    AUTH_JSON_IS_DEFAULT=$(grep -c 'XXXX' $AUTH_JSON_FILE);
+    if [ "${AUTH_JSON_IS_DEFAULT}" -ne 0 ]; then
+      echo_error "Please add your credentials in $AUTH_JSON_FILE";
+      exit 1;
+    else
+      echo_info "AUTH JSON IS FINE";
+    fi
   fi
 }
 
@@ -312,6 +314,22 @@ IDE:phpstorm () {
 }
 
 IDE:vscode () {
+      echo -e "
+  ${YELLOW}
+  ####################################
+  # Please add host entry.
+  #
+  # VSCode will be available when the
+  # docker build service informs of the
+  # 0.0.0.0 URl being available on this URL.
+  #
+  # MAC/LINUX:
+  # 127.0.0.1 vscode.loc
+  #
+  # WINDOWS:
+  # 192.168.99.100 vscode.loc
+  ####################################${NC}\n";
+
   RUNNING_PROJECT=${vmhost_name} ./bin/docker-compose build vscode-server && \
   RUNNING_PROJECT=${vmhost_name} ./bin/docker-compose up vscode-server
 }

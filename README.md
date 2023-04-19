@@ -24,7 +24,7 @@ cd docker-stack
 
 ### Install the sample Magento 2 Opensource project
 ```bash
-./project/m2_opensource setup_all
+./project/m2_opensource setup:all
 ```
 You may see an error requiring you to add credentials to auth.json, follow the instructions.
 

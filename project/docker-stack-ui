@@ -20,7 +20,7 @@ source ./project/includes/_functions_shared.sh               # Import the common
 php_host='php82'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
 required_containers=( "nginx" "${php_host}");
 composer_version="2";
-vmhost_name='docker-stack.localhost'; # domain name for this project in local vm.
+vmhost_name='docker-stack-ui.loc'; # domain name for this project in local vm.
 START_PHASE=4;
 
 ##############################

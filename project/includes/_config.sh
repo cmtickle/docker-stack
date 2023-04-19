@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Make ssh key permissions correct
-chmod 700 .ssh/*
-
 if [ ! -d "db_dumps" ]; then
 	echo "Creating db_dumps directory";
 	mkdir db_dumps;
