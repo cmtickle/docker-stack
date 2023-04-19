@@ -52,7 +52,7 @@ custom_setup () {
 ############################
 # CALL THE SHARED FUNCTIONS.
 ############################
-repository_clone;
+repository:clone;
 composer_install;
 custom_setup;
 host_entry_display;

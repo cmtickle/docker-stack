@@ -13,7 +13,7 @@
 # Magento 2 needs certain directories to work properly.
 # Create them if they're missing.
 #######################################################
-required_dirs_create () {
+internal_required_dirs_create () {
     # Phase ths step should run at.
     if [ $START_PHASE -gt 1 ] ; then
         echo_info "[!!] Skipping M2 directory fixes ...";

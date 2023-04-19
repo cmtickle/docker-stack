@@ -30,12 +30,12 @@ php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
 required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch7" "${php_host}" "${db_host}");
 composer_version="2";
 db_name='example_m2_commerce'; # unique name for this database
-vmhost_name='eg-m2-commerce.local'; # domain name for this project in local vm.
+vmhost_name='eg-m2-commerce.loc'; # domain name for this project in local vm.
 
 ####################################
 # FUNCTIONS SPECIFIC TO THIS INSTALL
 ####################################
-repository_clone () {
+repository:clone () {
     # Phase ths step should run at.
     if [ ${START_PHASE} -gt 1 ] ; then
         echo_warn "[!!] Skipping ${project_name} build ...";
@@ -84,8 +84,8 @@ internal_verify_required_containers_are_up;
 ############################
 
 recreate_database;
-repository_clone;
-required_dirs_create ;
+repository:clone;
+internal_required_dirs_create ;
 
 ## For Commerce, doing this rather than storing a DB and config as it was causing issues.
 bin/magento setup:install --base-url=https://${vmhost_name}/ \

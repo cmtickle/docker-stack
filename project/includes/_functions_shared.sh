@@ -41,10 +41,10 @@ files    : Download the codebase, run any additional commands to get the code st
 database : Downloads a copy of the database and configuration then loads these into the correct container.
 install  : Any final tasks required to get make the codebase operational e.g. composer or bin/magento
 
-<start_phase> supported options :: [files, database, install, all]
+<start_phase> supported options ::
 
 setup:all       = file, database and install phase functions
-setup:database  = database and install phase functions
+setup:database  = database and install phase functions ONLY
 setup:install   = install phase functions ONLY
 
 <custom_function> supported options ::
@@ -125,8 +125,6 @@ internal_verify_auth_json () {
     if [ "${AUTH_JSON_IS_DEFAULT}" -ne 0 ]; then
       echo_error "Please add your credentials in $AUTH_JSON_FILE";
       exit 1;
-    else
-      echo_info "AUTH JSON IS FINE";
     fi
   fi
 }
@@ -319,9 +317,9 @@ IDE:vscode () {
   ####################################
   # Please add host entry.
   #
-  # VSCode will be available when the
-  # docker build service informs of the
-  # 0.0.0.0 URl being available on this URL.
+  # When the Docker build process states
+  # 0.0.0.0 URL is available, access:
+  # http://vscode.loc
   #
   # MAC/LINUX:
   # 127.0.0.1 vscode.loc
@@ -342,7 +340,7 @@ IDE:vscode () {
 #     $project_name
 #     $vmhost_name
 ######################################
-repository_clone () {
+repository:clone () {
     # Phase ths step should run at.
     if [ ${START_PHASE} -gt 1 ] ; then
         echo_warn "[!!] Skipping ${repo_type} clone ...";

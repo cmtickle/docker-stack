@@ -1,10 +1,10 @@
 global:
   -
     path: web/unsecure/base_url
-    value: https://eg-m2-opensource.local/
+    value: https://eg-m2-opensource.loc/
   -
     path: web/secure/base_url
-    value: https://eg-m2-opensource.local/
+    value: https://eg-m2-opensource.loc/
   -
     path: dev/static/sign
     value: 0

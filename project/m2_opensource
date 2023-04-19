@@ -30,7 +30,7 @@ php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
 required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch7" "${php_host}" "${db_host}");
 composer_version="2";
 db_name='example_m2_opensource'; # unique name for this database
-vmhost_name='eg-m2-opensource.local'; # domain name for this project in local vm.
+vmhost_name='eg-m2-opensource.loc'; # domain name for this project in local vm.
 
 ##################################
 # INITIALISE THE VARIABLES/SCRIPT
@@ -42,8 +42,8 @@ internal_verify_required_containers_are_up;
 ############################
 # CALL THE SHARED FUNCTIONS.
 ############################
-repository_clone;
-required_dirs_create ;
+repository:clone;
+internal_required_dirs_create ;
 db:get;
 db:load;
 composer_config;
