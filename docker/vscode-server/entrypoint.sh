@@ -5,7 +5,7 @@ if [ -z "$RUNNING_PROJECT" ]; then
   exit 1;
 fi
 
-EXTENSIONS=redhat.vscode-yaml,vscode-icons-team.vscode-icons,esbenp.prettier-vscode,bmewburn.vscode-intelephense-client,mikestead.dotenv,ikappas.phpcs,neilbrayfield.php-docblocker
+EXTENSIONS=redhat.vscode-yaml,vscode-icons-team.vscode-icons,esbenp.prettier-vscode,bmewburn.vscode-intelephense-client,xdebug.php-debug,mikestead.dotenv,ikappas.phpcs,neilbrayfield.php-docblocker
 
 echo "Installing Extensions"
 for extension in $(echo ${EXTENSIONS} | tr "," "\n")

@@ -236,6 +236,7 @@ services:
         context: ./vscode-server
       ports:
         - "8443:8443"
+        - "9000:9000"
       environment:
           - RUNNING_PROJECT=${RUNNING_PROJECT}
           - VSCODE_SECURE=${VSCODE_SECURE}

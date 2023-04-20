@@ -115,6 +115,7 @@ RUN pecl install xdebug-3.2.1 \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini
 RUN echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >>  /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_port=9000" >>  /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.start_with_request=trigger" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.show_error_trace=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
