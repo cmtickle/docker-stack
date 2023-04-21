@@ -136,6 +136,7 @@ class AdminInterface
             "[
                 {
                     data: 'container',
+                    render: function (data, type) {if (type === 'display') { if (data == 'lighthouse-server') { return '<a target=\'_blank\' href=\'http://lighhouse.loc\'>lighthouse-server</a>';} else if (data == 'mailhog') { return '<a target=\'_blank\' href=\'http://mailhog.loc\'>mailhog</a>';} else if (data == 'kibana') { return '<a target=\'_blank\' href=\'http://kibana.loc\'>lighthouse-server</a>';} else if (data == 'vscode-server') { return '<a target=\'_blank\' href=\'http://vscode.loc\'>vscode-server</a>';} else { return data;} } return data;}
                 },
                 { 
                   data: 'status',
