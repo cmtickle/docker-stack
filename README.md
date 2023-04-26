@@ -5,8 +5,21 @@ This repository contains everything which should be needed to start developing o
 
 ## TLDR; Quick Start
 * Install requirements for [Linux](#linux-requirements) or [Mac](#mac-requirements)
+* [Add a local hosts entry](#add-a-local-hosts-entry)
 * [Download and start the Docker stack](#download-and-start-the-docker-stack)
 * [Install a project](#install-a-sample-m2-project)
+
+### Add a local hosts entry
+The local hosts file is used extensively by docker-stack to allow easy access to services and projects.
+It is recommended you add the following line to your hosts file in the first instance.
+
+The automated project setup scripts will advise of any further entries which need to be added.
+
+See [Hostinger: How to Edit Hosts File in Windows, MacOS and Linux](https://www.hostinger.co.uk/tutorials/how-to-edit-hosts-file)
+
+```bash
+0.0.0.0 docker-stack-ui.loc phpmyadmin.loc mailhog.loc dozzle.loc vscode.loc kibana.loc lighthouse.loc
+```
 
 ### Download and start the Docker stack
 Run the following commands (this assumes you're using Linux, PC needs a few changes making):
@@ -15,6 +28,7 @@ cd ~/
 git clone git@github.com:cmtickle/docker-stack.git
 cd docker-stack
 ```
+
 
 ### Build and start the required containers
 ```bash
@@ -32,9 +46,59 @@ Edit your hosts file per the message when this process completes.
 
 **You should now have a working M2 opensource instance!!**
 
-
-
 ------
+
+## What services are included, and where?
+
+Nginx, PHP (multiple), MySQL (multiple), Elasticsearch (multiple) 
+
+The above core services are intended to be specified as dependencies in the automated project setup scripts.
+If specified as a dependency, will start with `./project/<project_name> docker:start`.
+Alternatively start manually with `./bin/docker-compose up -d <container_name>`.
+
+The following ad-hoc services are optional but useful.
+
+### MailHog
+"An email testing tool for developers." [MailHog](https://github.com/mailhog/MailHog)
+
+This is configured as the default SMTP mail server all PHP versions. Start the service with `./project/mailhog docker:start` 
+then access at [http://mailhog.loc](http://mailhog.loc).
+
+### phpMyAdmin
+"Handle the administration of MySQL over the Web". [phpMyAdmin](https://www.phpmyadmin.net/)
+
+Start the service with `./project/phpmyadmin docker:start && /project/phpmyadmin setup:all` 
+then access at [http://phpmyadmin.loc](http://phpmyadmin.loc).
+
+### Dozzle
+"A lightweight, web-based Docker log viewer." [Dozzle](https://dozzle.dev/)
+
+Start the service with `./project/dozzle docker:start` 
+then access at [http://dozzle.loc](http://dozzle.loc). 
+
+### Kibana (and Elastic APM)
+"Kibana gives you the ability to understand your data quickly" [Kibana](https://www.elastic.co/kibana/)
+
+"APM Server receives data from Elastic APM agents and transforms it into Elasticsearch documents." [Elastic APM Server](https://github.com/elastic/apm-server)
+
+For use with [cmtickle/elastic-apm-magento](https://github.com/cmtickle/elastic-apm-magento).
+Adds Magento's default profiles to Kibana (under Observability > APM). Start the services with `./project/kibana docker:start`
+then access at [http://kibana.loc](http://kibana.loc). 
+
+### Lighthouse Server
+"The LHCI server saves historical Lighthouse data, displays trends in a dashboard, and offers an in-depth build comparison 
+UI to uncover differences between builds." [Lighthouse CI Server](https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/server.md)
+
+Start the service with `./project/lighthouse docker:start`
+then access at [http://lighthouse.loc](http://lighthouse.loc). 
+
+Profile a local (or remote) web server by running `./bin/lighthouse-collect <dns_name_of_web_host>` and following the instructions.
+
+### Visual Studio Code Server (VSCode Server)
+"A free, zero-install Microsoft Visual Studio Code experience running entirely in your browser." [Visual Studio Code Server](https://code.visualstudio.com/docs/editor/vscode-web)
+
+Start the service with `./project/<project_name> IDE:vscode`
+then access at [http://vscode.loc](http://vscode.loc)
 
 ## How to use this repository.
 * Clone the repository to your local machine.
