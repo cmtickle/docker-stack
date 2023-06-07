@@ -279,6 +279,13 @@ docker:status () {
   ./bin/docker-compose ${docker_compose_args} ps ${required_containers[*]}
 }
 
+############################
+# Restart all Docker containers
+############################
+docker_restart () {
+  docker_stop && docker_start
+}
+
 ##########################################
 # Show the status of all Docker containers
 ##########################################
