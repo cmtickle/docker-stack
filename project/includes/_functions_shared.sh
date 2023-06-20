@@ -282,8 +282,8 @@ docker:status () {
 ############################
 # Restart all Docker containers
 ############################
-docker_restart () {
-  docker_stop && docker_start
+docker:restart () {
+  docker:stop && docker:start
 }
 
 ##########################################
