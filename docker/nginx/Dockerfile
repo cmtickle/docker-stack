@@ -11,7 +11,6 @@ ADD nginx.conf /etc/nginx/nginx.conf
 ADD default.conf /etc/nginx/conf.d/default.conf
 ADD m-hosts.conf /etc/nginx/conf.d/z-m-hosts.conf
 ADD m-servers.conf /etc/nginx/conf.d/z-m-servers.conf
-ADD sf-hosts.conf /etc/nginx/conf.d/z-sf-hosts.conf
 ADD m-certs.conf /etc/nginx/conf.d/z-m-certs.conf
 
 # SSL
