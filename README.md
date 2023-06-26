@@ -18,7 +18,7 @@ The automated project setup scripts will advise of any further entries which nee
 See [Hostinger: How to Edit Hosts File in Windows, MacOS and Linux](https://www.hostinger.co.uk/tutorials/how-to-edit-hosts-file)
 
 ```bash
-0.0.0.0 docker-stack-ui.loc phpmyadmin.loc mailhog.loc dozzle.loc vscode.loc kibana.loc lighthouse.loc
+0.0.0.0 docker-stack-ui.loc phpmyadmin.loc mailhog.loc dozzle.loc vscode.loc kibana.loc lighthouse.loc rabbitmq.loc
 ```
 
 ### Download and start the Docker stack
