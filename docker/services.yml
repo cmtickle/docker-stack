@@ -205,8 +205,13 @@ services:
           - shared-tmp:/tmp
 
     rabbitmq:
-      image: rabbitmq:3.8
+      image: rabbitmq:3.8-management
       container_name: 'rabbitmq'
+      command: "/bin/bash -c \"rabbitmq-plugins enable rabbitmq_management; rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-plugins enable rabbitmq_web_mqtt; rabbitmq-plugins enable rabbitmq_amqp1_0; rabbitmq-server\""
+      ports:
+        - 1883:1883
+      volumes:
+        - ./rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
 
     dozzle:
       container_name: dozzle
