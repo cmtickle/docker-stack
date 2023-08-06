@@ -27,8 +27,6 @@ RUN apt-get update \
     libxslt1-dev \
     libzip-dev \
     unzip \
-    nodejs \
-    npm \
     sendmail-bin \
     sendmail \
     sudo \
@@ -48,6 +46,10 @@ RUN apt-get update \
 #    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get ('extension_dir');")/blackfire.so \
 #    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8707\n" > /usr/local/etc/php/conf.d/blackfire.ini \
 #    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
+
+# Install latest Node.js
+RUN curl -sL https://deb.nodesource.com/setup_18.x  | bash -
+RUN apt-get -y install nodejs
 
 # INSTALL YARN
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \

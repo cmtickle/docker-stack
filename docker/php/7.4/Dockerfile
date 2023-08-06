@@ -37,7 +37,8 @@ RUN apt-get update \
     rsyslog \
     default-mysql-client \
     git \
-    gnupg2
+    gnupg2 \
+    vim
 
 # INSTALL YARN
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
