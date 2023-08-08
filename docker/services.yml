@@ -123,6 +123,21 @@ services:
           soft: -1
           hard: -1
 
+    opensearch25:
+      build:
+        context: ./opensearch/2.5
+      environment:
+        - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+        - node.name=opensearch25
+        - discovery.type=single-node
+        - bootstrap.memory_lock=true
+        - plugins.security.disabled=true
+        - network.host=0.0.0.0
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+
     kibana:
       container_name: kibana
       image: docker.elastic.co/kibana/kibana:7.13.0

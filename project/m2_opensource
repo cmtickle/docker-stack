@@ -22,12 +22,12 @@ source "./docker/.env";                          # Enable access to the Docker e
 repo_type='github'; # 'github' or 'bitbucket'
 cvs_organisation='magento'; # the organisation name for Github or Bitbucket
 project_name='magento2'; # Name as used in Github or Bitbucket
-cvs_branch="2.4.5-p2";
+cvs_branch="2.4.6-p2";
 github_args='--depth 1';
 resources_storage='local'; # Where to access shared resources (see README.md), 'local' or 's3'
 db_host='mysql80'; # 'percona56' or 'percona57'
-php_host='php81'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
-required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "elasticsearch7" "${php_host}" "${db_host}");
+php_host='php82'; # 'php56', 'php70', 'php72', 'php73' or 'php74'
+required_containers=( "nginx" "rediscache" "redissession" "redisfullpage" "opensearch25" "${php_host}" "${db_host}");
 composer_version="2";
 db_name='example_m2_opensource'; # unique name for this database
 vmhost_name='eg-m2-opensource.loc'; # domain name for this project in local vm.
