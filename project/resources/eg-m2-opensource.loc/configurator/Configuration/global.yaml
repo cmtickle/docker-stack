@@ -10,16 +10,16 @@ global:
     value: 0
   -
     path: catalog/search/engine
-    value: elasticsearch7
+    value: opensearch
   -
-    path: catalog/search/elasticsearch7_server_hostname
-    value: elasticsearch7
+    path: catalog/search/opensearch_server_hostname
+    value: opensearch25
   -
-    path: catalog/search/elasticsearch7_server_port
+    path: catalog/search/opensearch_server_port
     value: 9200
   -
-    path: catalog/search/elasticsearch7_enable_auth
+    path: catalog/search/opensearch_enable_auth
     value: 0
   -
-    path: catalog/search/elasticsearch7_server_timeout
+    path: catalog/search/opensearch_server_timeout
     value: 15
