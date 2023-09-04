@@ -1,4 +1,4 @@
-FROM nginx:1.19.6
+FROM nginx:1.25
 ARG USERID=1000
 ARG GROUPID=1000
 RUN groupmod -g 999 dialout
