@@ -63,6 +63,15 @@ services:
             - web_files:/var/www/htdocs
             - shared-tmp:/tmp
 
+    selenium:
+      image: selenium/standalone-chrome:latest
+      shm_size: '2gb'
+      ports:
+        - "4444:4444"
+        - "7900:7900"
+      depends_on:
+        - nginx
+
     elasticsearch7:
         build:
            context: ./elasticsearch/7
