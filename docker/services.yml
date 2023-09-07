@@ -212,21 +212,21 @@ services:
         MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     redissession:
-      image: redis:4.0-alpine
+      image: redis:7-alpine
       command: redis-server /usr/local/etc/redis/redis.conf
       volumes:
         - ./redissession/redis.conf:/usr/local/etc/redis/redis.conf
         - shared-tmp:/tmp
 
     rediscache:
-      image: redis:4.0-alpine
+      image: redis:7-alpine
       command: redis-server /usr/local/etc/redis/redis.conf
       volumes:
         - ./rediscache/redis.conf:/usr/local/etc/redis/redis.conf
         - shared-tmp:/tmp
 
     redisfullpage:
-        image: redis:4.0-alpine
+        image: redis:7-alpine
         command: redis-server /usr/local/etc/redis/redis.conf
         volumes:
           - ./redisfullpage/redis.conf:/usr/local/etc/redis/redis.conf
