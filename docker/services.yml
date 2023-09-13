@@ -1,284 +1,292 @@
 version: '3'
 
 services:
-    mailhog:
-      image: mailhog/mailhog
-      ports:
-        - "1025:1025"
-        - "8025:8025"
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
-    php74:
-      user: "${USERID}:${GROUPID}"
-      build:
-        context: ./php/7.4
-      volumes:
-        - composer_cache:${HOME}/.composer/cache
-        - ssh-key:/var/www/htdocs/.ssh
-        - web_files:/var/www/htdocs
-        - shared-tmp:/tmp
-      environment:
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        XDEBUG_MODE: ${XDEBUG_MODE}
+  php74:
+    user: "${USERID}:${GROUPID}"
+    build:
+      context: ./php/7.4
+    volumes:
+      - composer_cache:${HOME}/.composer/cache
+      - ssh-key:/var/www/htdocs/.ssh
+      - web_files:/var/www/htdocs
+      - shared-tmp:/tmp
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      XDEBUG_MODE: ${XDEBUG_MODE}
 
-    php81:
-      user: "${USERID}:${GROUPID}"
-      build:
-        context: ./php/8.1
-      volumes:
-        - composer_cache:${HOME}/.composer/cache
-        - ssh-key:/var/www/htdocs/.ssh
-        - web_files:/var/www/htdocs
-        - shared-tmp:/tmp
-      environment:
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        XDEBUG_MODE: ${XDEBUG_MODE}
+  php81:
+    user: "${USERID}:${GROUPID}"
+    build:
+      context: ./php/8.1
+    volumes:
+      - composer_cache:${HOME}/.composer/cache
+      - ssh-key:/var/www/htdocs/.ssh
+      - web_files:/var/www/htdocs
+      - shared-tmp:/tmp
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      XDEBUG_MODE: ${XDEBUG_MODE}
 
-    php82:
-      user: "${USERID}:${GROUPID}"
-      build:
-        context: ./php/8.2
-      volumes:
-        - composer_cache:${HOME}/.composer/cache
-        - ssh-key:/var/www/htdocs/.ssh
-        - web_files:/var/www/htdocs
-        - shared-tmp:/tmp
-        - /var/run/docker.sock:/var/run/docker.sock
-        - docker-files:/var/www/htdocs/docker
-        - project-files:/var/www/htdocs/project
-        - bin-files:/var/www/htdocs/bin
-      environment:
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        XDEBUG_MODE: ${XDEBUG_MODE}
+  php82:
+    user: "${USERID}:${GROUPID}"
+    build:
+      context: ./php/8.2
+    volumes:
+      - composer_cache:${HOME}/.composer/cache
+      - ssh-key:/var/www/htdocs/.ssh
+      - web_files:/var/www/htdocs
+      - shared-tmp:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock
+      - docker-files:/var/www/htdocs/docker
+      - project-files:/var/www/htdocs/project
+      - bin-files:/var/www/htdocs/bin
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      XDEBUG_MODE: ${XDEBUG_MODE}
+      PHP_IDE_CONFIG: "serverName=docker"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-    nginx:
-        build:
-            context: ./nginx
-        ports:
-            - 80:80
-            - 443:443
-        volumes:
-            - web_files:/var/www/htdocs
-            - shared-tmp:/tmp
-        networks:
-          default:
-            aliases:
-              - eg-m2-opensource.loc
+  nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - web_files:/var/www/htdocs
+      - shared-tmp:/tmp
+    ports:
+      - "443:443"
+      - "80:80"
 
-    selenium:
-      image: selenium/standalone-chrome:latest
-      shm_size: '2gb'
-      ports:
-        - "4444:4444"
-        - "7900:7900"
-      depends_on:
-        - nginx
+  varnish:
+    image: varnish:7.3-alpine
+    volumes:
+      - ./varnish/default.vcl:/etc/varnish/default.vcl
+    depends_on:
+      - nginx
+    links:
+      - nginx
 
-    elasticsearch7:
-        build:
-           context: ./elasticsearch/7
-        environment:
-          - xpack.security.enabled=false
-          - discovery.type=single-node
-        ulimits:
-          memlock:
-            soft: -1
-            hard: -1
-          nofile:
-            soft: 65536
-            hard: 65536
-        cap_add:
-          - IPC_LOCK
-        volumes:
-          - elasticsearch7-data:/usr/share/elasticsearch7/data
-        ports:
-          - 9207:9200
-          - 9307:9300
+  selenium:
+    image: selenium/standalone-chrome:latest
+    shm_size: '2gb'
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    depends_on:
+      - nginx
 
-    elasticsearch716:
-      build:
-        context: ./elasticsearch/7.16
-      environment:
-        - xpack.security.enabled=false
-        - xpack.watcher.enabled=false
-        - xpack.monitoring.enabled=true
-        - discovery.type=single-node
-        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      ulimits:
-        memlock:
-          soft: -1
-          hard: -1
-        nofile:
-          soft: 65536
-          hard: 65536
-      cap_add:
-        - IPC_LOCK
-      volumes:
-        - elasticsearch716-data:/usr/share/elasticsearch7/data
-      ports:
-        - 9716:9200
-        - 9816:9300
+  elasticsearch7:
+    build:
+      context: ./elasticsearch/7
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch7-data:/usr/share/elasticsearch7/data
+    ports:
+      - 9207:9200
+      - 9307:9300
 
-    opensearch12:
-      build:
-        context: ./opensearch/1.2
-      environment:
-        - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-        - node.name=opensearch123
-        - discovery.type=single-node
-        - bootstrap.memory_lock=true
-        - plugins.security.disabled=true
-        - network.host=0.0.0.0
-      ulimits:
-        memlock:
-          soft: -1
-          hard: -1
+  elasticsearch716:
+    build:
+      context: ./elasticsearch/7.16
+    environment:
+      - xpack.security.enabled=false
+      - xpack.watcher.enabled=false
+      - xpack.monitoring.enabled=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch716-data:/usr/share/elasticsearch7/data
+    ports:
+      - 9716:9200
+      - 9816:9300
 
-    opensearch25:
-      build:
-        context: ./opensearch/2.5
-      environment:
-        - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-        - node.name=opensearch25
-        - discovery.type=single-node
-        - bootstrap.memory_lock=true
-        - plugins.security.disabled=true
-        - network.host=0.0.0.0
-      ulimits:
-        memlock:
-          soft: -1
-          hard: -1
+  opensearch12:
+    build:
+      context: ./opensearch/1.2
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - node.name=opensearch123
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - network.host=0.0.0.0
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
-    kibana:
-      container_name: kibana
-      image: docker.elastic.co/kibana/kibana:7.13.0
-      depends_on:
-        - elasticsearch716
-        - apm-server
-      environment:
-        - ELASTICSEARCH_URL=http://elasticsearch716:9200
-        - ELASTICSEARCH_HOSTS=http://elasticsearch716:9200
-        - xpack.apm.enabled=false
-        - xpack.encryptedSavedObjects.encryptionKey=
+  opensearch25:
+    build:
+      context: ./opensearch/2.5
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - node.name=opensearch25
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - network.host=0.0.0.0
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
-    apm-server:
-      image: docker.elastic.co/apm/apm-server:7.13.0
-      cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
-      cap_drop: ["ALL"]
-      depends_on:
-        - elasticsearch716
-      command: >
-        apm-server -e
-          -E apm-server.rum.enabled=true
-          -E setup.kibana.host=kibana:5601
-          -E setup.template.settings.index.number_of_replicas=0
-          -E apm-server.kibana.enabled=true
-          -E apm-server.kibana.host=kibana:5601
-          -E output.elasticsearch.hosts=["elasticsearch716:9200"]
-      healthcheck:
-        interval: 10s
-        retries: 12
-        test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.13.0
+    depends_on:
+      - elasticsearch716
+      - apm-server
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch716:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch716:9200
+      - xpack.apm.enabled=false
+      - xpack.encryptedSavedObjects.encryptionKey=
 
-    mysql57:
-      build:
-        context: ./mysql/5.7
-      ports:
-        - 3307:3306
-      volumes:
-        - mysql_data57:/var/lib/mysql
-      environment:
-        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:7.13.0
+    cap_add: [ "CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID" ]
+    cap_drop: [ "ALL" ]
+    depends_on:
+      - elasticsearch716
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+        -E output.elasticsearch.hosts=["elasticsearch716:9200"]
+    healthcheck:
+      interval: 10s
+      retries: 12
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
 
-    mysql80:
-      build:
-        context: ./mysql/8.0
-      ports:
-        - 3308:3306
-      volumes:
-        - mysql_data80:/var/lib/mysql
-      working_dir: /var/lib/mysql
-      command: --default-authentication-plugin=mysql_native_password
-      environment:
-        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-        MYSQL_ROOT_HOST: "%"
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  mysql57:
+    build:
+      context: ./mysql/5.7
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql_data57:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-    redissession:
-      image: redis:5-alpine
-      command: redis-server /usr/local/etc/redis/redis.conf
-      volumes:
-        - ./redissession/redis.conf:/usr/local/etc/redis/redis.conf
-        - shared-tmp:/tmp
+  mysql80:
+    build:
+      context: ./mysql/8.0
+    ports:
+      - 3308:3306
+    volumes:
+      - mysql_data80:/var/lib/mysql
+    working_dir: /var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-    rediscache:
-      image: redis:5-alpine
-      command: redis-server /usr/local/etc/redis/redis.conf
-      volumes:
-        - ./rediscache/redis.conf:/usr/local/etc/redis/redis.conf
-        - shared-tmp:/tmp
+  redissession:
+    image: redis:5-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redissession/redis.conf:/usr/local/etc/redis/redis.conf
+      - shared-tmp:/tmp
 
-    redisfullpage:
-        image: redis:5-alpine
-        command: redis-server /usr/local/etc/redis/redis.conf
-        volumes:
-          - ./redisfullpage/redis.conf:/usr/local/etc/redis/redis.conf
-          - shared-tmp:/tmp
+  rediscache:
+    image: redis:5-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./rediscache/redis.conf:/usr/local/etc/redis/redis.conf
+      - shared-tmp:/tmp
 
-    rabbitmq:
-      image: rabbitmq:3.8-management
-      container_name: 'rabbitmq'
-      command: "/bin/bash -c \"rabbitmq-plugins enable rabbitmq_management; rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-plugins enable rabbitmq_web_mqtt; rabbitmq-plugins enable rabbitmq_amqp1_0; rabbitmq-server\""
-      ports:
-        - 1883:1883
-      volumes:
-        - ./rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
+  redisfullpage:
+    image: redis:5-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redisfullpage/redis.conf:/usr/local/etc/redis/redis.conf
+      - shared-tmp:/tmp
 
-    dozzle:
-      container_name: dozzle
-      image: amir20/dozzle:latest
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: 'rabbitmq'
+    command: "/bin/bash -c \"rabbitmq-plugins enable rabbitmq_management; rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-plugins enable rabbitmq_web_mqtt; rabbitmq-plugins enable rabbitmq_amqp1_0; rabbitmq-server\""
+    ports:
+      - 1883:1883
+    volumes:
+      - ./rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
 
-    lighthouse-server:
-      build:
-        context: ./lighthouse-server
-      ports:
-        - '9001:9001'
-      volumes:
-        - lhci-data:/data
-      cap_add:
-        - SYS_ADMIN
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
-    phpstorm-server:
-      user: "${USERID}:${GROUPID}"
-      build:
-        context: ./phpstorm-server
-      ports:
-        - '5993:5993'
-      environment:
-        - RUNNING_PROJECT=${RUNNING_PROJECT}
-      volumes:
-        - ssh-key:/var/www/htdocs/.ssh
-        - web_files:/var/www/htdocs
+  lighthouse-server:
+    build:
+      context: ./lighthouse-server
+    ports:
+      - '9001:9001'
+    volumes:
+      - lhci-data:/data
+    cap_add:
+      - SYS_ADMIN
 
-    vscode-server:
-      user: "${USERID}:${GROUPID}"
-      build:
-        context: ./vscode-server
-      ports:
-        - "8443:8443"
-        - "9000:9000"
-      environment:
-          - RUNNING_PROJECT=${RUNNING_PROJECT}
-          - VSCODE_SECURE=${VSCODE_SECURE}
-      volumes:
-        - ssh-key:/var/www/htdocs/.ssh
-        - web_files:/var/www/htdocs
+  phpstorm-server:
+    user: "${USERID}:${GROUPID}"
+    build:
+      context: ./phpstorm-server
+    ports:
+      - '5993:5993'
+    environment:
+      - RUNNING_PROJECT=${RUNNING_PROJECT}
+    volumes:
+      - ssh-key:/var/www/htdocs/.ssh
+      - web_files:/var/www/htdocs
+
+  vscode-server:
+    user: "${USERID}:${GROUPID}"
+    build:
+      context: ./vscode-server
+    ports:
+      - "8443:8443"
+      - "9000:9000"
+    environment:
+      - RUNNING_PROJECT=${RUNNING_PROJECT}
+      - VSCODE_SECURE=${VSCODE_SECURE}
+    volumes:
+      - ssh-key:/var/www/htdocs/.ssh
+      - web_files:/var/www/htdocs

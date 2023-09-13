@@ -61,4 +61,3 @@ if [[ "$PWD" == *"docker-stack"* || "$PWD" == *"htdocs"* ]]; then
 else
     ${REAL_DOCKER_COMPOSE_CMD} ${BASH_ARGVS[*]};
 fi
-
