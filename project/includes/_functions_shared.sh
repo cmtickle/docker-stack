@@ -349,7 +349,7 @@ IDE:vscode () {
 
 ######################################################
 # Create local clone of CVS Repository
-#
+# ** needs to add host key or git clone fails **
 # Required variables:
 #     $repo_type
 #     $project_name
