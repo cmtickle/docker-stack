@@ -8,9 +8,9 @@ RUN usermod -u $USERID nginx
 RUN groupmod -o -g $GROUPID nginx
 
 ADD nginx.conf /etc/nginx/nginx.conf
-ADD default-dev.conf /etc/nginx/conf.d/default.conf
+ADD default-prod.conf /etc/nginx/conf.d/default.conf
 ADD m-hosts.conf /etc/nginx/conf.d/z-m-hosts.conf
-ADD m-servers-dev.conf /etc/nginx/conf.d/z-m-servers.conf
+ADD m-servers-prod.conf /etc/nginx/conf.d/z-m-servers.conf
 ADD m-certs.conf /etc/nginx/conf.d/z-m-certs.conf
 
 # SSL

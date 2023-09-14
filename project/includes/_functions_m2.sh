@@ -248,6 +248,19 @@ docker:mode:set() {
     fi
     docker:copy "${PHP_BUILD_ENV}/php.ini-${DEPLOY_MODE}" ${php_host}:/usr/local/etc/php/php.ini;
     ./bin/docker-compose restart "${php_host}";
+    if [[ "${DEPLOY_MODE}" == "production" && -f 'docker/nginx/Dockerfile-prod' ]]; then
+      mv docker/nginx/Dockerfile docker/nginx/Dockerfile-dev && mv docker/nginx/Dockerfile-prod docker/nginx/Dockerfile;
+    elif [[ "${DEPLOY_MODE}" == "developer" && -f 'docker/nginx/Dockerfile-dev' ]]; then
+      mv docker/nginx/Dockerfile docker/nginx/Dockerfile-prod && mv docker/nginx/Dockerfile-dev docker/nginx/Dockerfile;
+    fi
+    docker:refresh
+     if [[ "${DEPLOY_MODE}" == "production" ]]; then
+       bin/magento config:set system/full_page_cache/caching_application 2 # setting varnish full page cache
+     else
+       bin/magento config:set system/full_page_cache/caching_application 1 # setting built-in full page cache
+     fi
+     bin/magento cache:flush
+
 }
 
 #####################################
