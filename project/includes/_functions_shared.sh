@@ -262,7 +262,15 @@ docker:build () {
 # Start the required docker containers
 ######################################
 docker:start () {
-  ./bin/docker-compose ${docker_compose_args} up -d ${required_containers[*]}
+   ./bin/docker-compose ${docker_compose_args} up -d ${required_containers[*]};
+  aliases=();
+    for f in $(docker exec -it docker-stack_nginx_1 bash -c "cd /var/www/htdocs; ls -d *.{loc,local,localhost} 2>/dev/null")
+      do
+        aliases+=("--alias ${f} ");
+    done
+    nginx_container=$(./bin/docker-compose ps -q nginx);
+    docker network disconnect docker_default "$nginx_container";
+    docker network connect ${aliases[@]} docker_default "$nginx_container";
 }
 
 ############################

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 REAL_DOCKER_COMPOSE_CMD=$(which -a docker-compose | grep -v 'docker-stack' | head -1);
+DOCKER_PROJECT_NAME=$(basename "$(pwd)");
 
 # INFO:
 # If you want to disable the default docker-stack behaviour of volume/file synchronisation add the following to your .bashrc or .zprofile file:
@@ -56,9 +57,9 @@ if [[ "$PWD" == *"docker-stack"* || "$PWD" == *"htdocs"* ]]; then
     docker_args=$(echo "${docker_args}" | sed "s/build\s*\(.*\)/build --build-arg USERID=$(id -u) --build-arg GROUPID=$(id -g) \1/");
   fi
 
-  USERID=$(id -u) GROUPID=$(id -g) ${REAL_DOCKER_COMPOSE_CMD} -f ./docker/services.yml -f ./docker/volumes.yml ${ARCH_SERVICE_YML} ${VOLUME_SYNC_YML} ${docker_args}
+  USERID=$(id -u) GROUPID=$(id -g) ${REAL_DOCKER_COMPOSE_CMD} --project-name "${DOCKER_PROJECT_NAME}" -f ./docker/services.yml -f ./docker/volumes.yml ${ARCH_SERVICE_YML} ${VOLUME_SYNC_YML} ${docker_args}
   exit "$?";
 else
-    ${REAL_DOCKER_COMPOSE_CMD} ${BASH_ARGVS[*]};
+    ${REAL_DOCKER_COMPOSE_CMD} --project-name  "${DOCKER_PROJECT_NAME}" ${BASH_ARGVS[*]};
 fi
 
