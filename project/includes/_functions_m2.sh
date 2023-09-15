@@ -221,7 +221,7 @@ composer_require_dev_tools () {
     if [[ "${resources_storage}" == "local" && -d "./project/resources/${vmhost_name}/configurator" ]] ||
        [[ "${resources_storage}" == "s3" && "$(s3cmd ls s3://${s3_bucket}/${vmhost_name}/configurator | wc -l)" -eq 1 ]]; then
       echo_info "Installing CTI Digital Configurator ...";
-      ./bin/docker-exec ${php_host} "cd /var/www/htdocs/${vmhost_name}/; ${COMPOSER_COMMAND} require --no-update --dev ctidigital/magento2-configurator:3.1.3";
+      ./bin/docker-exec ${php_host} "cd /var/www/htdocs/${vmhost_name}/; ${COMPOSER_COMMAND} require --no-update --dev ctidigital/magento2-configurator";
       ./bin/docker-exec ${php_host} "cd /var/www/htdocs/${vmhost_name}/; ${COMPOSER_COMMAND} update ctidigital/magento2-configurator";
     else
       echo_error "Failed to find configuration files in ${resources_storage}"
