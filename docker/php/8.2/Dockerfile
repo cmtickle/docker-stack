@@ -47,16 +47,6 @@ RUN apt-get update \
 #    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8707\n" > /usr/local/etc/php/conf.d/blackfire.ini \
 #    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
 
-# Install latest Node.js
-RUN curl -sL https://deb.nodesource.com/setup_18.x  | bash -
-RUN apt-get -y install nodejs
-
-# INSTALL YARN
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt update && \
-    apt install -y yarn
-
 # Configure the gd library
 RUN docker-php-ext-configure \
   gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/
@@ -101,9 +91,6 @@ RUN curl -O https://files.magerun.net/n98-magerun2.phar \
     && chmod +x n98-magerun2.phar \
     && mv n98-magerun2.phar /usr/local/bin/n98-magerun2
 
-# INSTALL GRUNT
-RUN npm install -g grunt-cli
-
 #INSTALL PLAYWRIGHT FOR CRITICAL CSS
 RUN apt-get update \
   && apt-get install -y \
@@ -111,6 +98,22 @@ RUN apt-get update \
     libnspr4\
     libgbm1\
     libasound2
+
+# Install latest Node.js
+RUN apt-get update && sudo apt-get install -y ca-certificates curl gnupg
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+ARG NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update && sudo apt-get install nodejs -y
+
+# INSTALL YARN
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt update && \
+    apt install -y yarn
+
+# INSTALL GRUNT
+RUN npm install -g grunt-cli
 
 #XDEBUG @todo switch xdebug on/off via deploy:mode:set production/developer
 #RUN pecl install xdebug-3.2.1 \
