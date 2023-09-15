@@ -112,19 +112,19 @@ RUN apt-get update \
     libgbm1\
     libasound2
 
-#XDEBUG
-RUN pecl install xdebug-3.2.1 \
-    && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini
-RUN echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.client_host=host.docker.internal" >>  /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.client_port=9000" >>  /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.start_with_request=trigger" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.show_error_trace=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.log=\"/tmp/xdebug.log\"" >> /usr/local/etc/php/conf.d/xdebug.ini \
-    && echo "xdebug.output_dir=\"/tmp/\"" >> /usr/local/etc/php/conf.d/xdebug.ini
+#XDEBUG @todo switch xdebug on/off via deploy:mode:set production/developer
+#RUN pecl install xdebug-3.2.1 \
+#    && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini
+#RUN echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.client_host=host.docker.internal" >>  /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.client_port=9000" >>  /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.start_with_request=trigger" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.show_error_trace=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.discover_client_host=1" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.log=\"/tmp/xdebug.log\"" >> /usr/local/etc/php/conf.d/xdebug.ini \
+#    && echo "xdebug.output_dir=\"/tmp/\"" >> /usr/local/etc/php/conf.d/xdebug.ini
 
 # Add base php.ini and php-fpm config
 ADD php.ini-developer /usr/local/etc/php/php.ini
