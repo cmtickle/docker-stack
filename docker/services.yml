@@ -235,8 +235,8 @@ services:
       ports:
         - 1883:1883
       volumes:
-        - ./rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
-
+        - ./rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.conf
+        
     dozzle:
       container_name: dozzle
       image: amir20/dozzle:latest
