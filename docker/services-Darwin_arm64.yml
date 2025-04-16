@@ -1,5 +1,3 @@
-version: '3'
-
 services:
 #  mysql56:
 #    platform: linux/x86_64

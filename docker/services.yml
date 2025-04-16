@@ -1,5 +1,3 @@
-version: '3'
-
 services:
     mailhog:
       image: mailhog/mailhog
@@ -39,6 +37,42 @@ services:
       user: "${USERID}:${GROUPID}"
       build:
         context: ./php/8.2
+      volumes:
+        - composer_cache:${HOME}/.composer/cache
+        - ssh-key:/var/www/htdocs/.ssh
+        - web_files:/var/www/htdocs
+        - shared-tmp:/tmp
+        - /var/run/docker.sock:/var/run/docker.sock
+        - docker-files:/var/www/htdocs/docker
+        - project-files:/var/www/htdocs/project
+        - bin-files:/var/www/htdocs/bin
+      environment:
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        XDEBUG_MODE: ${XDEBUG_MODE}
+
+    php83:
+      user: "${USERID}:${GROUPID}"
+      build:
+        context: ./php/8.3
+      volumes:
+        - composer_cache:${HOME}/.composer/cache
+        - ssh-key:/var/www/htdocs/.ssh
+        - web_files:/var/www/htdocs
+        - shared-tmp:/tmp
+        - /var/run/docker.sock:/var/run/docker.sock
+        - docker-files:/var/www/htdocs/docker
+        - project-files:/var/www/htdocs/project
+        - bin-files:/var/www/htdocs/bin
+      environment:
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        XDEBUG_MODE: ${XDEBUG_MODE}
+
+    php84:
+      user: "${USERID}:${GROUPID}"
+      build:
+        context: ./php/8.4
       volumes:
         - composer_cache:${HOME}/.composer/cache
         - ssh-key:/var/www/htdocs/.ssh
@@ -132,16 +166,17 @@ services:
           soft: -1
           hard: -1
 
-    opensearch25:
+    opensearch212:
       build:
-        context: ./opensearch/2.5
+        context: ./opensearch/2.12
       environment:
         - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-        - node.name=opensearch25
+        - node.name=opensearch212
         - discovery.type=single-node
         - bootstrap.memory_lock=true
         - plugins.security.disabled=true
         - network.host=0.0.0.0
+        - OPENSEARCH_INITIAL_ADMIN_PASSWORD=_7gl9=5OB3,2
       ulimits:
         memlock:
           soft: -1

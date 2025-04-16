@@ -1,7 +1,4 @@
-version: '3'
-
 volumes:
-  lhci-data:
   composer_cache:
   web_files:
 #  mysql_data56:
