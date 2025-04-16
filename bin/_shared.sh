@@ -22,9 +22,9 @@ OS=$(uname)_$(uname -m);
 
 # DECLARE REQUIREMENTS FOR SUPPORTED OPERATING SYSTEMS
 Linux_x86_64_REQUIREMENTS=("git" "docker-compose" "docker" "s3cmd");
+Linux_aarch64_REQUIREMENTS=("git" "docker-compose" "docker" "s3cmd");
 Darwin_x86_64_REQUIREMENTS=("git" "docker-compose" "docker" "s3cmd");
 Darwin_arm64_REQUIREMENTS=("git" "docker-compose" "docker" "s3cmd");
-
 # ASSIGN REQUIREMENTS FOR THIS OPERATING SYSTEM
 declare -n PLATFORM_REQUIREMENTS="${OS}_REQUIREMENTS"
 if [ -z ${PLATFORM_REQUIREMENTS} ]; then
