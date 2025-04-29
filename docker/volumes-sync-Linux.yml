@@ -1,5 +1,3 @@
-version: '3'
-
 volumes:
   web_files:
     driver: local

@@ -263,14 +263,23 @@ docker:build () {
 ######################################
 docker:start () {
    ./bin/docker-compose ${docker_compose_args} up -d ${required_containers[*]};
-  aliases=();
-    for f in $(docker exec -it docker-stack_nginx_1 bash -c "cd /var/www/htdocs; ls -d *.{loc,local,localhost} 2>/dev/null")
-      do
-        aliases+=("--alias ${f} ");
-    done
-    nginx_container=$(./bin/docker-compose ps -q nginx);
-    docker network disconnect docker_default "$nginx_container";
-    docker network connect ${aliases[@]} docker_default "$nginx_container";
+    # Dynamically get project name from current folder
+     project_name=$(basename "$PWD")
+
+     # Build dynamic container and network names
+     container_name="${project_name}-nginx-1"
+     network_name="${project_name}_default"
+
+     aliases=();
+     for f in $(docker exec -i "$container_name" bash -c "cd /var/www/htdocs; ls -d *.{loc,local,localhost} 2>/dev/null")
+     do
+         aliases+=("--alias ${f}")
+     done
+
+     nginx_container=$(./bin/docker-compose ps -q nginx)
+
+     docker network disconnect "$network_name" "$nginx_container"
+     docker network connect ${aliases[@]} "$network_name" "$nginx_container"
 }
 
 ############################
