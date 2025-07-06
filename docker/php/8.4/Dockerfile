@@ -73,7 +73,8 @@ RUN docker-php-ext-install \
   zip \
   soap \
   bcmath \
-  sockets
+  sockets \
+  ftp
 
 #IMAGEMAGICK
 RUN pecl install imagick \
@@ -90,7 +91,7 @@ RUN pecl install -o -f redis \
 
 # INSTALL COMPOSER VERSIONS
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer1 --version=1.10.19
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer2 --version=2.1.14
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer2 --version=2.8.9
 
 # MAGERUN
 RUN curl -O https://files.magerun.net/n98-magerun.phar \
@@ -113,7 +114,7 @@ RUN apt-get update \
     libasound2
 
 #XDEBUG
-RUN pecl install xdebug-3.2.1 \
+RUN pecl install xdebug-3.4.4 \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini
 RUN echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >>  /usr/local/etc/php/conf.d/xdebug.ini \
