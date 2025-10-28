@@ -3,6 +3,8 @@ Dockerised system to run LEMP stack applications (primarily developed to run Mag
 
 This repository contains everything which should be needed to start developing on a Magento 2 project.
 
+**IMPORTANT NOTE:** This Docker environemnt/stack is meant for SOFTWARE DEVELOPMENT purposes. It exposes ports (e.g. database) to the host machine and, unless protected by a firewall, these will be exposed to the internet if the host machine is directly connected to the internet.
+
 ## TLDR; Quick Start
 * Install requirements for [Linux](#linux-requirements) or [Mac](#mac-requirements)
 * [Add a local hosts entry](#add-a-local-hosts-entry)
